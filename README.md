@@ -79,17 +79,17 @@ Key components include:
 
 ## Visualisations
 
-![Fig1](a.png)
+![Fig1](Fig1.png)
 
-![Fig2](b.png)
+![Fig2](Fig2.png)
 
-![Fig3](c.png)
+![Fig3](Fig3.png)
 
-![Fig4](d.png)
+![Fig4](Fig4.png)
 
-![Fig5](e.png)
+![Fig5](Fig5.png)
 
-![Fig6](f.png)
+![Fig6](Fig6.png)
 
 
 ## 🛠 Requirements
