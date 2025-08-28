@@ -38,39 +38,39 @@ On top of scraping, the project also includes an **R Markdown report** with expl
 
 ---
 
-## 📖 R Markdown Analysis (`Final_Project.Rmd`)
+## R Markdown Analysis (`Final_Project.Rmd`)
 
 The **Rmd file** (`Final_Project.Rmd`) builds upon the enriched dataset and produces insights via visualizations and commentary.  
 Key components include:
 
-### 1️⃣ Temporal Trends
+### Temporal Trends
 - **Number of movies per decade**
 - **IMDb ratings by decade** (boxplots)
 - **Runtime evolution across decades**
 - **Average runtime by genre**
 
-### 2️⃣ Director Analysis
+### Director Analysis
 - **Top 15 directors by IMDb rating** (bar plots & boxplots)
 - **Genre specialization vs. diversity**
 - **Diversity vs. consistency plots**
 - **Word clouds of directors (by frequency & average rating)**
 
-### 3️⃣ Genre Analysis
+### Genre Analysis
 - **Top genres by decade** (line trends)
 - **Ratings vs. runtime by genre**
 
-### 4️⃣ Actor Analysis
+### Actor Analysis
 - **Most frequent actors** (bar plot)
 - **Top actors by IMDb rating** (bar plot & boxplots)
 - **Actor career trajectories across decades**
 - **Word cloud of actors (frequency & ratings)**
 
-### 5️⃣ Sequels & Reboots
+### Sequels & Reboots
 - **IMDb rating trends across sequel numbers**
 - **Boxplots of sequels with annotated medians**
 - **Reboots with same title and their rating trends**
 
-### 6️⃣ Financial Analysis
+### Financial Analysis
 - **Wikipedia + TMDb budget/revenue integration**
 - **Profit percentage estimates**
 - **Patterns in high-profit vs. low-profit films**
@@ -85,7 +85,7 @@ The rest of the visualisations are uploaded as Fig2, Fig3, Fig4, Fig5 and Fig6
 ## Report
 
 The full write-up of this project is available here:  
-[A Cinematic Journey through Data (PDF)](Report.pdf)
+[A Cinematic Journey through Data (PDF)](FinalReport.pdf)
 
 
 
