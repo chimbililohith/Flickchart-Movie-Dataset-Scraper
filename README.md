@@ -79,17 +79,15 @@ Key components include:
 
 ## Visualisations
 
-![Fig1](Fig1.png)
-
-![Fig2](Fig2.png)
-
-![Fig3](Fig3.png)
-
-![Fig4](Fig4.png)
-
 ![Fig5](Fig5.png)
 
 ![Fig6](Fig6.png)
+
+## Report
+
+The full write-up of this project is available here:  
+[A Cinematic Journey through Data (PDF)](A%20Cinematic%20Journey%20through%20Data.pdf)
+
 
 
 ## 🛠 Requirements
