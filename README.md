@@ -79,17 +79,17 @@ Key components include:
 
 ## Visualisations
 
-!(preview/a.png)
+![](preview/a.png)
 
-!(preview/b.png)
+![](preview/b.png)
 
-!(preview/c.png)
+![](preview/c.png)
 
-!(preview/d.png)
+![](preview/d.png)
 
-!(preview/e.png)
+![](preview/e.png)
 
-!(preview/f.png)
+![](preview/f.png)
 
 
 ## 🛠 Requirements
