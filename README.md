@@ -85,7 +85,7 @@ The rest of the visualisations are uploaded as Fig2, Fig3, Fig4, Fig5 and Fig6
 ## Report
 
 The full write-up of this project is available here:  
-[A Cinematic Journey through Data (PDF)](A Cinematic Journey through Data.pdf)
+[A Cinematic Journey through Data (PDF)](Report.pdf)
 
 
 
