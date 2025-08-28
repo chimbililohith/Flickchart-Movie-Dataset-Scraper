@@ -25,12 +25,8 @@ On top of scraping, the project also includes an **R Markdown report** with expl
 
 ---
 
-## 📊 Output Datasets
-After running, you’ll find:
-
-- **`data/flickchart_titles_all_pages.csv`** – raw scraped titles + metadata  
-- **`data/flickchart_full_dataset.csv`** – cleaned Flickchart-only dataset  
-- **`data/enriched_movies.csv`** – fully enriched dataset with external APIs  
+## Output Dataset:  
+- **`movies_info.csv`** – fully enriched dataset with external APIs  
 
 **Columns in final dataset:**
 - `title`, `year`, `director`, `duration`, `cast`, `genre`
@@ -80,6 +76,21 @@ Key components include:
 - **Patterns in high-profit vs. low-profit films**
 
 ---
+
+## Visualisations
+
+!(preview/a.png)
+
+!(preview/b.png)
+
+!(preview/c.png)
+
+!(preview/d.png)
+
+!(preview/e.png)
+
+!(preview/f.png)
+
 
 ## 🛠 Requirements
 Install required R packages:
