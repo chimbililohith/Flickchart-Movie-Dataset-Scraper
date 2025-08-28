@@ -1,0 +1,1602 @@
+---
+title: "Final Project"
+output: html_document
+date: "2025-04-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1st I am web scraping, from flickchart, which consists of title, cast, director, genre, year and duration
+```{r}
+# Load required libraries
+library(rvest)
+library(dplyr)
+library(readr)
+
+# Step 1: Set the URL
+url <- "https://www.flickchart.com/charts.aspx?perpage=10000"  # Replace with your target page
+ 
+# Step 2: Read the HTML content
+ page <- read_html(url)
+
+ # Step 3: Use the selector from SelectorGadget
+ # Example selector you copied might be: ".title", ".product", "#id-name", etc.
+ data_nodes <- page %>% html_elements("#chart a span")  # Replace with your selector
+  # Step 4: Extract the text content
+ data_text <- data_nodes %>% html_text(trim = TRUE)
+ 
+ # Step 5: Save to CSV
+ df <- data.frame(text = data_text) %>% filter(text != str_detect("+https:"))
+ write_csv(df, "scraped_data.csv")
+ # Replace with your target page  
+```
+
+```{r}
+library(rvest)
+library(dplyr)
+library(readr)
+library(stringr)
+library(purrr)
+
+# Define function to scrape one page
+scrape_flickchart_page <- function(page_num) {
+  url <- paste0("https://www.flickchart.com/charts.aspx?perpage=10000&page=", page_num)
+  message("Scraping page: ", page_num)
+  
+  page <- read_html(url)
+  
+  titles <- page %>%
+    html_elements("#chart a span") %>%
+    html_text(trim = TRUE) %>%
+    .[!str_detect(., "http[s]?://")] %>%  # Remove any link-like text
+    .[. != ""]                            # Remove empty strings
+  
+  tibble(title = titles, page = page_num)
+}
+
+# Scrape pages 1 to 40
+all_titles <- map_dfr(1:40, scrape_flickchart_page)
+
+# Save to CSV
+write_csv(all_titles, "flickchart_titles_all_pages.csv")
+
+# View sample
+head(all_titles)
+
+```
+
+```{r}
+scrape_flickchart_page <- function(page_num) {
+     url <- paste0("https://www.flickchart.com/charts.aspx?perpage=10000&page=", page_num)
+     message("Scraping page: ", page_num)
+     
+     page <- read_html(url)
+     
+     titles <- page %>%
+         html_elements(".chartsYear") %>%
+         html_text(trim = TRUE) %>%
+         .[!str_detect(., "http[s]?://")] %>%  # Remove any link-like text
+         .[. != ""]                            # Remove empty strings
+     
+     tibble(title = titles, page = page_num)
+ }
+ 
+ # Scrape pages 1 to 40
+ all_years <- map_dfr(1:40, scrape_flickchart_page)
+```
+
+```{r}
+scrape_flickchart_page <- function(page_num) {
+     url <- paste0("https://www.flickchart.com/charts.aspx?perpage=10000&page=", page_num)
+     message("Scraping page: ", page_num)
+     
+     page <- read_html(url)
+     
+     titles <- page %>%
+         html_elements(".chartsYear") %>%
+         html_text(trim = TRUE) %>%
+         .[!str_detect(., "http[s]?://")] %>%  # Remove any link-like text
+         .[. != ""]                            # Remove empty strings
+     
+     tibble(title = titles, page = page_num)
+ }
+ 
+ # Scrape pages 1 to 40
+ all_years <- map_dfr(1:40, scrape_flickchart_page)
+```
+
+```{r}
+scrape_flickchart_page <- function(page_num) {
+     url <- paste0("https://www.flickchart.com/charts.aspx?perpage=10000&page=", page_num)
+     message("Scraping page: ", page_num)
+     
+     page <- read_html(url)
+     
+     titles <- page %>%
+         html_elements(".minutes") %>%
+         html_text(trim = TRUE) %>%
+         .[!str_detect(., "http[s]?://")] %>%  # Remove any link-like text
+         .[. != ""]                            # Remove empty strings
+     
+     tibble(title = titles, page = page_num)
+ }
+ 
+ # Scrape pages 1 to 40
+ all_duration <- map_dfr(1:40, scrape_flickchart_page)
+```
+
+```{r}
+scrape_flickchart_page <- function(page_num) {
+     url <- paste0("https://www.flickchart.com/charts.aspx?perpage=10000&page=", page_num)
+     message("Scraping page: ", page_num)
+     
+     page <- read_html(url)
+     
+     titles <- page %>%
+         html_elements(".director .filterLink:nth-child(1)") %>%
+         html_text(trim = TRUE) %>%
+         .[!str_detect(., "http[s]?://")] %>%  # Remove any link-like text
+         .[. != ""]                            # Remove empty strings
+     
+     tibble(title = titles, page = page_num)
+ }
+ 
+ # Scrape pages 1 to 40
+ all_director <- map_dfr(1:40, scrape_flickchart_page)
+```
+
+```{r}
+scrape_flickchart_page <- function(page_num) {
+     url <- paste0("https://www.flickchart.com/charts.aspx?perpage=10000&page=", page_num)
+     message("Scraping page: ", page_num)
+     
+     page <- read_html(url)
+     
+     titles <- page %>%
+         html_elements(".genre") %>%
+         html_text(trim = TRUE) %>%
+         .[!str_detect(., "http[s]?://")] %>%  # Remove any link-like text
+         .[. != ""]                            # Remove empty strings
+     
+     tibble(title = titles, page = page_num)
+ }
+ 
+ # Scrape pages 1 to 40
+ all_genre <- map_dfr(1:40, scrape_flickchart_page)
+```
+uh..ohh...only 9999 came 
+```{r}
+df <- all_genre %>% group_by(page) %>% summarise(sum = n())
+```
+
+75th in the page 30 doesn't have any genre on the website so manually as comedy 
+and comedy drama inserting it and have to get down one one each that is 75th 
+value to 76, 76th value to 77th, etc.
+
+```{r}
+all_genre_1 <- all_genre %>% slice(1:74)
+all_genre_2 <- data.frame(title = "Comedy • Comedy Drama", page = 30)
+all_genre_3 <- all_genre %>% slice(75:9999)
+all_genre_final <- bind_rows(all_genre_1,all_genre_2,all_genre_3)
+```
+
+```{r}
+scrape_flickchart_page <- function(page_num) {
+     url <- paste0("https://www.flickchart.com/charts.aspx?perpage=10000&page=", page_num)
+     message("Scraping page: ", page_num)
+     
+     page <- read_html(url)
+     
+     titles <- page %>%
+         html_elements(".director") %>%
+         html_text(trim = TRUE) %>%
+         .[!str_detect(., "http[s]?://")] %>%  # Remove any link-like text
+         .[. != ""]                            # Remove empty strings
+     
+     tibble(title = titles, page = page_num)
+ }
+ 
+ # Scrape pages 1 to 40
+ all_cast <- map_dfr(1:40, scrape_flickchart_page)
+```
+
+```{r}
+all_cast_clean <- all_cast %>%
+  mutate(
+    title = str_replace_all(title, "[\r\n\t]", ""),   # Remove control characters
+    title = str_squish(title)                         # Trim and squash multiple spaces
+  )
+
+all_cast_clean1 <- all_cast_clean %>% mutate(title = str_extract(title, "(?<=Starring: ).*"))
+```
+
+```{r}
+cast <- all_cast_clean1 %>% select(1) %>% rename(cast = title)
+director <- all_director %>% select(1) %>% rename(director = title)
+duration <- all_duration %>% select(1) %>% rename(duration = title)
+genre <- all_genre_final %>% select(1) %>% rename(genre = title)
+year <- all_years %>% select(1) %>% rename(year = title)
+title <- all_titles %>% select(1) 
+data <-  bind_cols(title,year,director,duration,cast,genre)
+data <- data %>%
+  mutate(
+    duration = str_replace_all(duration, ",", ""),         # remove commas
+    duration = str_replace(duration, "min\\.$", ""),       # remove "min." at the end
+    duration = str_squish(duration)                        # remove extra spaces
+  )
+```
+
+ http://www.omdbapi.com/?i=tt3896198&apikey=3b100719
+ 
+
+```{r}
+library(httr)
+library(jsonlite)
+library(dplyr)
+
+# API key (corrected)
+api_key <- "3b100719"
+
+get_rating <- function(title, year) {
+  title <- str_squish(title)
+  year <- as.integer(year)
+
+  tryCatch({
+    # First try with year
+    url1 <- paste0("http://www.omdbapi.com/?t=", URLencode(title), "&y=", year, "&apikey=", api_key)
+    res1 <- httr::GET(url1)
+    content1 <- fromJSON(content(res1, as = "text"))
+    
+    if (!is.null(content1$imdbRating) && content1$imdbRating != "N/A") {
+      return(as.numeric(content1$imdbRating))
+    }
+
+    # Fallback: try without year
+    url2 <- paste0("http://www.omdbapi.com/?t=", URLencode(title), "&apikey=", api_key)
+    res2 <- httr::GET(url2)
+    content2 <- fromJSON(content(res2, as = "text"))
+
+    if (!is.null(content2$imdbRating) && content2$imdbRating != "N/A") {
+      return(as.numeric(content2$imdbRating))
+    }
+
+    return(NA)
+  }, error = function(e) {
+    return(NA)
+  })
+}
+
+movies_with_ratings <- data %>%
+  rowwise() %>%
+  mutate(imdb_rating = get_rating(title, year)) %>%
+  ungroup()
+
+na_ratings <- movies_with_ratings %>% filter(is.na(imdb_rating))
+
+```
+
+```{r}
+na_ratings <- na_ratings %>%
+  mutate(
+    title2 = str_trim(str_remove(title, ":.*$"))  # remove colon and everything after it
+  )
+```
+
+```{r}
+movies_with_ratings_1 <- na_ratings %>%
+  rowwise() %>%
+  mutate(imdb_rating = get_rating(title2, year)) %>%
+  ungroup()
+```
+
+```{r}
+na_ratings2 <- movies_with_ratings_1 %>% filter(is.na(imdb_rating))
+```
+
+```{r}
+# Left join to bring in updated ratings
+merged <- movies_with_ratings %>%
+  left_join(movies_with_ratings_1, by = "title", suffix = c("", "_new")) %>%
+  mutate(
+    imdb_rating = coalesce(imdb_rating, imdb_rating_new)  # prefer original, fill missing with new
+  ) %>%
+  select(-imdb_rating_new)  # remove the helper column
+```
+
+Now data set is ready with only 232 NA observstions on imdb ratings.
+
+```{r}
+# Create decade column and summarize
+a <- merged %>%
+  mutate(decade = floor(as.numeric(year) / 10) * 10) %>%
+  group_by(decade) %>%
+  summarise(total = n(), .groups = "drop")
+
+# Plot the results
+ggplot(a, aes(x = as.factor(decade), y = total)) +
+  geom_col(fill = "darkorange") +
+  labs(
+    title = "Number of Movies per Decade",
+    x = "Decade",
+    y = "Movie Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+top_directors <- merged %>%
+  group_by(director) %>%
+  filter(n() >= 5) %>%
+  summarise(avg_rating = mean(imdb_rating, na.rm = TRUE)) %>%
+  arrange(desc(avg_rating)) %>%
+  slice_head(n = 15)
+
+ggplot(top_directors, aes(x = reorder(director, avg_rating), y = avg_rating)) +
+  geom_col(fill = "lightblue") +
+  coord_flip() +
+  labs(title = "Top 15 Directors by Average IMDb Rating (min 5 movies)",
+       x = "Director", y = "Average IMDb Rating") + theme_minimal()
+
+```
+Key Observations:
+
+Masaki Kobayashi leads the list with the highest average IMDb rating — just above 8.0 — suggesting strong consistency and audience acclaim across his works.
+
+Sergio Leone, Jacques Tati, and Christopher Nolan follow closely, reinforcing their reputation for producing critically acclaimed films with wide audience appeal.
+
+All directors in this list maintain average IMDb ratings above ~7.8, indicating that their filmographies are not just one-hit wonders but consistently well-received.
+
+A mix of international auteurs (e.g., Jean-Pierre Melville, Hayao Miyazaki, Tarkovsky) and modern mainstream directors (e.g., Nolan, Villeneuve, Cameron) suggests that excellence spans both global cinema and Hollywood.
+
+```{r}
+# Step 2: Filter original dataset for only those directors
+top_director_movies <- merged %>%
+  filter(director %in% top_directors$director)
+
+# Step 3: Create boxplot
+ggplot(top_director_movies, aes(x = reorder(director, imdb_rating, FUN = median), y = imdb_rating)) +
+  geom_boxplot(fill = "lightgreen", outlier.color = "black") +
+  coord_flip() +
+  labs(title = "IMDb Rating Distributions for Top 15 Directors (min 5 movies)",
+       x = "Director", y = "IMDb Rating") +
+  theme_minimal()
+```
+1. Jacques Tati has the widest spread:
+His films range from ~7.0 to 10, indicating both highly acclaimed and moderately received titles. High variance suggests creative experimentation across his work.
+
+2. Masaki Kobayashi shows strong consistency:
+Very narrow IQR and high median (≈8.3).
+His works are consistently top-rated, reflecting sustained critical acclaim.
+
+3. Christopher Nolan, Tarantino, and Sergio Leone also show high median ratings (~8.2+), but:
+They have a wider spread, indicating some polarizing or experimental entries.
+
+4. Andrei Tarkovsky has a lower median but tight spread:
+Suggests niche appeal — consistently well-regarded among a specific audience.
+
+5. Don Hertzfeldt and Nick Park show minimal spread:
+Their IMDb ratings cluster closely, indicating consistently well-received output, albeit possibly with fewer total ratings per film.
+
+6. Chuck Jones has a few outliers:
+Likely due to the nature of animation shorts or varying audience reception across decades.
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+merged <- merged %>%
+  mutate(year = as.numeric(year))
+
+
+decade <- merged %>%
+  mutate(decade = floor(year / 10) * 10)
+
+ggplot(decade, aes(x = as.factor(decade), y = imdb_rating)) +
+  geom_boxplot() +
+  scale_x_discrete(name = "Decade") +
+  labs(title = "IMDb Ratings by Decade", y = "IMDb Rating") +
+  theme_minimal()
+
+
+```
+Gradual Increase (1890s–1950s):
+Median IMDb ratings steadily rise from the 1890s through the 1950s.
+Early decades show lower medians and tighter spreads, likely due to a smaller number of surviving films and simpler rating behavior.
+
+Stabilization (1950s–2010s):
+From the 1950s onward, medians stabilize around 7.0–7.5.
+This suggests a consistency in perceived quality or rating patterns over modern film history.
+
+Wider IQR and Outliers in Recent Decades:
+1980s–2020s show more outliers, both high and low.
+Indicates broader public access, higher film volume, and more polarizing content.
+
+Notable Dip in the 1980s:
+Median ratings appear slightly lower in the 1980s.
+May reflect a mix of commercial focus, genre experimentation, or cultural trends of the time.
+
+🎯 Summary:
+Film ratings have become more varied but stabilized in quality since the mid-20th century.
+Early cinema is underrepresented and may skew low due to lack of data or retrospective evaluation.
+The consistent median ratings from the 1950s onward show that audience expectations and critical standards have leveled out, despite increasing film production.
+
+
+
+url <- "https://streaming-availability.p.rapidapi.com/shows/%7Btype%7D/%7Bid%7D"
+0e83eb26b0msheb8f7e4b978dcbfp1e78f4jsne2f87d41b599
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+# Extract primary genre and compute decade
+genre_decade <- merged %>%
+  mutate(year = as.numeric(year),
+         decade = floor(year / 10) * 10,
+         primary_genre = str_trim(str_split_fixed(genre, "•", 2)[, 1])) %>%
+  filter(!is.na(primary_genre), !is.na(decade))
+
+# Count genres per decade
+genre_counts <- genre_decade %>%
+  group_by(decade, primary_genre) %>%
+  summarise(count = n(), .groups = "drop")
+
+# Plot top genres (filtering top 7 overall for clarity)
+top_genres <- genre_counts %>%
+  group_by(primary_genre) %>%
+  summarise(total = sum(count)) %>%
+  arrange(desc(total)) %>%
+  slice_head(n = 7) %>%
+  pull(primary_genre)
+
+ggplot(genre_counts %>% filter(primary_genre %in% top_genres), 
+       aes(x = decade, y = count, color = primary_genre)) +
+  geom_line(size = 1.2) +
+  scale_x_continuous(breaks = seq(1890, 2020, by = 20), limits = c(1880, 2025)) +
+  labs(title = "Top Genre Trends by Decade",
+       x = "Decade", y = "Number of Movies", color = "Genre") +
+  theme_minimal()
+
+```
+
+Key Observations:
+1. 📈 Drama dominates:
+Drama has been the most consistently produced genre, especially peaking in the 2000s and 2010s.
+It shows a steady upward trend from 1900 to 2010, followed by a sharp decline in the 2020s (likely due to incomplete data or limited releases post-2020).
+
+2. 🧨 Action & Adventure surged post-1980:
+Both genres experience explosive growth starting in the 1980s, peaking around the 2000s–2010s.
+Reflects the rise of blockbusters, franchise films, and global streaming appeal.
+
+3. 📘 Based-on-a-True-Story grows steadily:
+Real-life inspired films gained popularity in the post-1980s era, likely due to more biopics and historical dramas.
+This genre almost rivals Adventure by the 2000s.
+
+4. 📚 Based-on-20th-Century-Literature remains steady but modest:
+Remains a niche genre with stable, lower production volume across decades.
+
+5. 😂 Comedy & Comedy Drama:
+Comedy had a visible rise in the 1990s–2000s, while Comedy Drama rose sharply post-1980, indicating a trend toward hybrid emotional storytelling.
+
+6. 🔻 Sharp drop after 2010:
+The decline across all genres in the 2020s is likely due to:
+Fewer releases post-2020 (pandemic impact)
+Limited dataset coverage for recent years
+
+🎯 Summary:
+This chart highlights how social tastes, media formats, and production trends have shifted over time. Drama remains the most produced, while Action, Adventure, and true-story adaptations have risen with modern cinema's commercial and emotional trends.
+
+```{r}
+runtime_decade <- merged %>%
+  mutate(year = as.numeric(year),
+         duration = as.numeric(duration),
+         decade = floor(year / 10) * 10) %>%
+  filter(!is.na(duration), duration > 20, duration < 300)  # filtering unrealistic values
+
+runtime_trend <- runtime_decade %>%
+  group_by(decade) %>%
+  summarise(avg_runtime = mean(duration, na.rm = TRUE), .groups = "drop")
+
+ggplot(runtime_trend, aes(x = decade, y = avg_runtime)) +
+  geom_line(color = "steelblue", size = 1.2) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = seq(1890, 2020, by = 10), limits = c(1880, 2025)) +
+  labs(title = "Average Movie Runtime by Decade",
+       x = "Decade", y = "Average Runtime (minutes)") +
+  theme_minimal()
+
+```
+Key Observations:
+1. 📉 Sharp Drop from 1890s to 1900s:
+The average runtime plunges from ~100 mins to ~40 mins.
+Early 1900s were dominated by silent short films, which explains the low average.
+
+2. 📈 Gradual Growth Post-1910:
+Runtime steadily increases from the 1910s onward, crossing 100 minutes by the 1950s.
+Reflects the emergence of narrative-driven cinema, better production, and longer attention spans.
+
+3. 📊 Stabilization from 1950s–2000s (~100–110 mins):
+For about 6 decades, average runtime stays relatively stable.
+Hollywood and global films found an optimal storytelling length here.
+
+4. 🔼 Modern Increase in the 2020s (~120 mins):
+Likely driven by:
+Streaming platforms allowing longer formats
+Superhero franchises, epic dramas, and multi-part stories
+Less theatrical constraint = more director freedom
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+# Prepare data
+runtime_by_genre <- merged %>%
+  mutate(
+    year = as.numeric(year),
+    duration = as.numeric(duration),
+    decade = floor(year / 10) * 10,
+    primary_genre = str_trim(str_split_fixed(genre, "•", 2)[, 1])
+  ) %>%
+  filter(!is.na(duration), duration > 20, duration < 300, !is.na(primary_genre), !is.na(decade))
+
+# Focus on top 5 most common genres
+top_genres <- runtime_by_genre %>%
+  count(primary_genre, sort = TRUE) %>%
+  slice_head(n = 5) %>%
+  pull(primary_genre)
+
+# Compute average runtime per genre per decade
+avg_runtime_genre <- runtime_by_genre %>%
+  filter(primary_genre %in% top_genres) %>%
+  group_by(decade, primary_genre) %>%
+  summarise(avg_runtime = mean(duration, na.rm = TRUE), .groups = "drop")
+
+# Plot
+ggplot(avg_runtime_genre, aes(x = decade, y = avg_runtime, color = primary_genre)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = seq(1880, 2020, by = 10), limits = c(1880, 2025)) +
+  labs(
+    title = "Average Runtime by Genre and Decade",
+    x = "Decade", y = "Average Runtime (minutes)",
+    color = "Genre"
+  ) +
+  theme_minimal()
+
+```
+Action:
+Started short (~30 mins in early 1900s), but shows a consistent and steep increase.
+By 2020s, Action has the highest average runtime, exceeding 130 minutes, likely due to epic-scale productions and franchises (e.g., Marvel, Nolan films).
+
+📚 Drama:
+Steady climb over time, reaching ~120 minutes in the 2020s.
+Consistently one of the longer genres — reflects narrative depth and emotional complexity.
+
+😂 Comedy:
+Historically shorter (~40–60 mins pre-1950), gradually increased to ~100–110 mins.
+In modern decades, Comedy remains shorter than Action or Drama, aligning with its punchier storytelling format.
+
+🎭 Comedy Drama:
+Slightly longer than pure Comedy across decades.
+Balances narrative depth with levity — runtime grows in modern eras, indicating the popularity of dramedies.
+
+🧭 Adventure:
+Grows steadily, but does not match the rise of Action or Drama in later years.
+May reflect Adventure's shift into family-oriented or animated content with moderate runtimes.
+
+General Trend:
+All genres show increasing runtime over the decades, with a notable spike in the 2020s.
+
+The rise may be due to:
+Streaming platforms enabling more flexible formats
+Increasing viewer tolerance for long-form storytelling
+Bigger budgets, multi-part sagas, and extended cut
+
+```{r}
+ggplot(avg_runtime_genre, aes(x = decade, y = avg_runtime)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_point(color = "black", size = 2) +
+  facet_wrap(~ primary_genre) +
+  scale_x_continuous(breaks = seq(1880, 2020, by = 10), limits = c(1880, 2025)) +
+  labs(
+    title = "Average Movie Runtime by Genre and Decade (Faceted)",
+    x = "Decade", y = "Average Runtime (minutes)"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+ggplot(runtime_by_genre %>% filter(primary_genre %in% top_genres),
+       aes(x = duration, y = imdb_rating, color = primary_genre)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(
+    title = "IMDb Rating vs Runtime by Genre",
+    x = "Runtime (minutes)", y = "IMDb Rating", color = "Genre"
+  ) +
+  theme_minimal()
+
+```
+Adventure:
+Strong upward trend: Longer Adventure movies tend to receive significantly higher ratings, especially beyond the 120-minute mark.
+Suggests that audiences reward deeper, expansive storytelling typical of epic adventures.
+
+🟢 Comedy:
+Shorter comedies (<90 mins) tend to get lower ratings.
+There's a subtle improvement in ratings with increasing length, but still plateaus around 7.5—implying that comedy success is more about content than length.
+
+🔵 Comedy Drama:
+Shows a similar pattern to Comedy, but overall has higher ratings across the board.
+Ratings increase with length, especially beyond 100 mins, showing the value of combining emotional weight with humor.
+
+🔴 Action:
+Peaks around 120–150 minutes, then slightly drops.
+Overlong action movies (>160 mins) may suffer from pacing fatigue, affecting viewer ratings.
+
+🟣 Drama:
+Fairly stable trend, with moderate increases until ~180 mins.
+Beyond that, ratings stabilize or dip, possibly reflecting diminishing returns for overly long dramas.
+
+🔍 Overall Insights:
+Longer runtimes (120–150 mins) tend to correlate with higher ratings for genres like Adventure, Drama, and Comedy Drama.
+However, extreme runtimes (>180 mins) do not necessarily lead to higher ratings and may hurt pacing and engagement.
+Comedy performs well in the 90–110 min range, suggesting concise humor works best.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+# Step 1: Get top 15 directors by average rating
+top_15_directors <- merged %>%
+  group_by(director) %>%
+  filter(n() >= 5) %>%
+  summarise(avg_rating = mean(imdb_rating, na.rm = TRUE)) %>%
+  arrange(desc(avg_rating)) %>%
+  slice_head(n = 15) %>%
+  pull(director)
+
+# Step 2: Filter dataset and separate genres
+ratings_by_genre <- merged %>%
+  filter(director %in% top_15_directors) %>%
+  select(director, title, genre, imdb_rating) %>%
+  mutate(genre = str_squish(genre)) %>%
+  separate_rows(genre, sep = " • ") %>%
+  filter(!is.na(imdb_rating) & genre != "") %>%
+  group_by(director, genre) %>%
+  summarise(avg_rating = mean(imdb_rating, na.rm = TRUE), n = n(), .groups = "drop") %>%
+  filter(n >= 2)  # Only keep genres with at least 2 movies per director
+
+ggplot(ratings_by_genre, aes(x = reorder(genre, avg_rating), y = avg_rating, fill = genre)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.7) +
+  coord_flip() +
+  facet_wrap(~ director, scales = "free_y") +
+  labs(
+    title = "Average IMDb Rating by Genre for Top 15 Directors",
+    x = "Genre", y = "Average IMDb Rating", fill = "Genre"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+```
+
+This faceted bar chart gives a rich visual breakdown of average IMDb ratings by genre for each of the top 15 directors (with at least 5 films). Here's the key inference:
+
+🎬 Top Insights:
+
+Directors with Genre Consistency:
+Hayao Miyazaki and Denis Villeneuve show consistent high ratings (~8+) across multiple genres like Drama, Adventure, Dystopian, and Action Thriller.
+Christopher Nolan excels in Action, Drama, and Farce (the latter possibly due to misclassification, but high nonetheless).
+
+Genre Specialization:
+Jacques Tati is focused on Coming-of-Age genre with high average ratings.
+Chuck Jones works across many genres but ratings stay consistently good without extreme highs.
+
+Best Genre-Director Pairs:
+Masaki Kobayashi in Mystery and 20th Century Literature adaptations.
+Quentin Tarantino scores highly in Black Comedy, Crime Thriller, and Buddy Film genres.
+Sergio Leone shows strong association with Outlaw and New Hollywood genres.
+
+Visual Style Enhancements:
+The genre-based coloring makes it easy to spot genre overlap across directors (e.g., Drama and Crime are common).
+Directors like Don Hertzfeldt and Andrei Tarkovsky work in fewer genres but show solid average ratings, suggesting focused mastery.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(stringr)
+
+# Step 1: Split genres into separate rows
+genre_diversity <- merged %>%
+  filter(director %in% top_15_directors) %>%
+  select(director, genre) %>%
+  separate_rows(genre, sep = "•") %>%
+  mutate(genre = str_squish(genre)) %>%
+  distinct(director, genre) %>%
+  count(director, name = "genre_count") %>%
+  arrange(desc(genre_count))
+
+# Step 2: Plot
+ggplot(genre_diversity, aes(x = reorder(director, genre_count), y = genre_count)) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(title = "Genre Diversity of Top 15 Directors",
+       x = "Director",
+       y = "Number of Unique Genres") +
+  theme_minimal()
+
+
+```
+The plot shows the genre diversity (number of unique genres) explored by the top 15 directors. Key insights:
+
+Chuck Jones stands out with the widest genre range among all, having worked across 38 distinct genres.
+Christopher Nolan and Hayao Miyazaki also exhibit strong genre versatility, each covering over 25 genres.
+Directors like Nick Park, Jacques Tati, and Don Hertzfeldt explored comparatively fewer genres, sticking to a more consistent thematic style.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+
+# Step 1: Genre diversity
+genre_diversity <- merged %>%
+  filter(director %in% top_15_directors) %>%
+  select(director, genre) %>%
+  separate_rows(genre, sep = "•") %>%
+  mutate(genre = str_squish(genre)) %>%
+  distinct(director, genre) %>%
+  count(director, name = "genre_count")
+
+# Step 2: IMDb rating variance + average
+rating_stats <- merged %>%
+  filter(director %in% top_15_directors) %>%
+  group_by(director) %>%
+  summarise(
+    rating_sd = sd(imdb_rating, na.rm = TRUE),
+    avg_rating = mean(imdb_rating, na.rm = TRUE)
+  )
+
+# Step 3: Merge all
+diversity_vs_variance <- left_join(genre_diversity, rating_stats, by = "director")
+
+# Step 4: Plot with color by average rating
+ggplot(diversity_vs_variance, aes(x = genre_count, y = rating_sd, label = director, color = avg_rating)) +
+  geom_point(size = 4) +
+  geom_text(vjust = -0.7, size = 3) +
+  scale_color_gradient(low = "skyblue", high = "red") +
+  labs(title = "Genre Diversity vs IMDb Rating Variance (Colored by Avg. Rating)",
+       x = "Number of Unique Genres",
+       y = "Standard Deviation of IMDb Ratings",
+       color = "Avg. IMDb Rating") +
+  theme_minimal()
+
+```
+Key Observations:
+🎨 Jacques Tati stands out:
+Highest genre diversity (~32 genres).
+Highest variance in IMDb ratings (~1.7).
+Interpretation: Tati explored many genres, but his reception varied significantly — a creative risk-taker.
+
+🔥 Masaki Kobayashi and Nick Park:
+Low variance + high average ratings (reddest points, tight vertical spread).
+Indicates consistent critical acclaim, even with fewer genres.
+
+🎯 Chuck Jones:
+Highest genre diversity after Tati, with very low variance.
+Suggests strong mastery across many categories — but with more consistent audience reception.
+
+🎬 Christopher Nolan and Quentin Tarantino:
+Broad genre exploration with moderate variance.
+Both balance innovation with audience approval.
+
+📈 General Trend:
+Directors with fewer genres tend to show less variance, possibly due to working within known comfort zones.
+A few directors (e.g., Andrei Tarkovsky) manage high average ratings with minimal genre diversity and variance — suggesting niche excellence.
+
+```{r}
+library(tidyverse)
+
+cast_long <- merged %>%
+  select(title, year, imdb_rating, cast) %>%
+  separate_rows(cast, sep = ",\\s*") %>%
+  mutate(cast = str_squish(cast)) %>%
+  filter(cast != "")
+actor_counts <- cast_long %>%
+  count(cast, sort = TRUE)
+actor_ratings <- cast_long %>%
+  group_by(cast) %>%
+  summarise(
+    num_movies = n(),
+    avg_rating = mean(imdb_rating, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  filter(num_movies >= 5) %>%
+  arrange(desc(avg_rating))
+
+```
+
+```{r}
+top_actors <- actor_counts %>% slice_max(n, n = 15)
+
+ggplot(top_actors, aes(x = reorder(cast, n), y = n)) +
+  geom_col(fill = "skyblue") +
+  coord_flip() +
+  labs(title = "Top 15 Most Frequent Actors", x = "Actor", y = "Number of Movies") +
+  theme_minimal()
+
+```
+
+
+```{r}
+top_rated_actors <- actor_ratings %>% slice_max(avg_rating, n = 15)
+
+ggplot(top_rated_actors, aes(x = reorder(cast, avg_rating), y = avg_rating)) +
+  geom_col(fill = "lightgreen") +
+  coord_flip() +
+  labs(title = "Top 15 Actors by Avg IMDb Rating (min 5 movies)", x = "Actor", y = "Avg IMDb Rating") +
+  theme_minimal()
+
+```
+```{r}
+top_actor_names <- top_rated_actors$cast
+
+cast_long %>%
+  filter(cast %in% top_actor_names) %>%
+  ggplot(aes(x = imdb_rating, y = reorder(cast, imdb_rating))) +
+  geom_boxplot(fill = "plum") +
+  labs(title = "IMDb Rating Distributions for Top Actors", x = "IMDb Rating", y = "Actor") +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+cast_decade <- cast_long %>%
+  filter(cast %in% top_actor_names) %>%
+  mutate(decade = floor(as.numeric(year) / 10) * 10)
+actor_decade_counts <- cast_decade %>%
+  group_by(cast, decade) %>%
+  summarise(movie_count = n(), .groups = "drop")
+
+
+ggplot(actor_decade_counts, aes(x = decade, y = movie_count, fill = cast)) +
+  geom_col(position = "dodge") +
+  scale_x_continuous(breaks = seq(1880, 2020, by = 10)) +
+  labs(title = "Movies Released per Decade for Top 15 Actors",
+       x = "Decade", y = "Number of Movies") +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(ncol = 3))
+
+```
+
+```{r}
+cast_long <- cast_long %>% 
+  mutate(year = as.numeric(year)) %>% 
+  filter(!is.na(year))
+
+# Get top 15 most frequent actors
+top_actors <- cast_long %>%
+  count(cast, sort = TRUE) %>%
+  slice_max(n, n = 15) %>%
+  pull(cast)
+
+# Filter for those actors and calculate decade
+actor_decades <- cast_long %>%
+  filter(cast %in% top_actors) %>%
+  mutate(decade = floor(year / 10) * 10)
+
+# Group and count
+actor_decade_counts <- actor_decades %>%
+  group_by(cast, decade) %>%
+  summarise(movie_count = n(), .groups = "drop")
+
+
+
+ggplot(actor_decade_counts, aes(x = decade, y = movie_count)) +
+  geom_col(fill = "steelblue") +
+  facet_wrap(~ cast, scales = "free_y") +
+  scale_x_continuous(breaks = seq(1880, 2020, by = 10)) +
+  labs(title = "Movies Released per Decade for Top 15 Frequent Actors",
+       x = "Decade", y = "Number of Movies") +
+  theme_minimal()
+
+
+
+```
+
+```{r}
+# Step 1: Ensure `year` is numeric
+cast_long <- cast_long %>%
+  mutate(year = as.numeric(year)) %>%
+  filter(!is.na(year))
+
+# Step 2: Top 15 most frequent actors
+top_actors <- cast_long %>%
+  count(cast, sort = TRUE) %>%
+  slice_max(n, n = 15) %>%
+  pull(cast)
+
+# Step 3: Movies per decade per actor + avg IMDb rating
+actor_decade_stats <- cast_long %>%
+  filter(cast %in% top_actors) %>%
+  mutate(decade = floor(year / 10) * 10) %>%
+  group_by(cast, decade) %>%
+  summarise(
+    movie_count = n(),
+    avg_rating = mean(imdb_rating, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Step 4: Plot
+ggplot(actor_decade_stats, aes(x = decade, y = movie_count, fill = avg_rating)) +
+  geom_col() +
+  facet_wrap(~ cast, scales = "free_y") +
+  scale_x_continuous(breaks = seq(1880, 2020, by = 10)) +
+  scale_fill_gradient(low = "skyblue", high = "darkred", na.value = "grey80") +
+  labs(
+    title = "Movies per Decade Colored by Avg IMDb Rating (Top 15 Actors)",
+    x = "Decade", y = "Number of Movies", fill = "Avg IMDb Rating"
+  ) +
+  theme_minimal()
+```
+Actors with High Ratings & Consistency:
+Mel Blanc and James Stewart consistently appeared in well-rated movies, especially from the 1940s–60s, with average IMDb ratings often exceeding 8.0+.
+Buster Keaton and Charles Chaplin had large filmographies in the silent era (1910s–1920s), with Chaplin’s 1910s peak being particularly massive (60 films!) and well-regarded.
+Michael Caine and Tom Hanks have sustained popularity, though their recent decades show a slight decline in rating color intensity.
+
+🎯 Actors with Select Decade Peaks:
+Matt Damon, Johnny Depp, and Robert De Niro peaked in output during the 1990s–2000s, with average ratings around 7.0–8.0.
+Denzel Washington showed a stable output across multiple decades, with relatively high IMDb scores in the 1990s and 2000s.
+
+📉 Lower Rated/Recent Output:
+Nicolas Cage had a large output in the 1990s–2000s, but with generally lower IMDb ratings, reflected in lighter blue bars.
+Bruce Willis also shows high quantity in the 2000s, but many movies with sub-7.0 average ratings.
+
+📽️ Pioneering Legends:
+Georges Méliès is an outlier, active exclusively in the 1890s–1910s, with moderately rated early experimental films.
+
+🔍 Overall Observations:
+Decade-wise, the 1990s–2000s dominate output for most modern actors.
+Classic actors of the mid-1900s tend to have higher average IMDb ratings, possibly reflecting enduring appeal and critical acclaim.
+The color gradient effectively highlights the balance (or tradeoff) between volume and quality over time.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+# Ensure necessary transformations
+merged1 <- merged %>%
+  mutate(
+    decade = floor(as.numeric(year) / 10) * 10,
+    duration = as.numeric(duration),
+    genre = as.factor(genre),
+    decade = as.factor(decade)  # Convert to factor for interaction
+  ) %>%
+  filter(!is.na(imdb_rating), !is.na(duration), !is.na(genre), !is.na(decade))
+
+# Fit linear model with interaction
+model <- lm(imdb_rating ~ duration + decade, data = merged1)
+
+# Summary of the model
+summary(model)
+
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(wordcloud)
+library(RColorBrewer)
+
+# Step 1: Prepare long-format cast data
+cast_long <- merged %>%
+  select(title, cast) %>%
+  separate_rows(cast, sep = ",\\s*") %>%
+  mutate(cast = str_squish(cast)) %>%
+  filter(cast != "")
+
+# Step 2: Count appearances of each cast member
+cast_freq <- cast_long %>%
+  count(cast, sort = TRUE)
+
+# Step 3: Create word cloud (top 200 cast members)
+wordcloud(
+  words = cast_freq$cast,
+  freq = cast_freq$n,
+  max.words = 1000,
+  random.order = TRUE,
+  rot.per = 0.25,
+  scale = c(4, 0.1),
+  colors = brewer.pal(8, "Dark2")
+)
+
+
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+library(wordcloud)
+library(RColorBrewer)
+
+# Step 1: Clean and count director appearances
+director_freq <- merged %>%
+  filter(!is.na(director)) %>%
+  mutate(director = str_squish(director)) %>%
+  count(director, sort = TRUE)
+
+# Step 2: Generate word cloud
+wordcloud(
+  words = director_freq$director,
+  freq = director_freq$n,
+  max.words = 1000,
+  random.order = TRUE,
+  rot.per = 0.25,
+  scale = c(4, 0.1),
+  colors = brewer.pal(8, "Dark2")
+)
+
+```
+
+```{r}
+library(stringr)
+library(dplyr)
+library(wordcloud2)
+library(scales)  # for color mapping
+
+# Step 1: Compute average IMDb rating per director
+director_stats <- merged %>%
+  filter(!is.na(director), !is.na(imdb_rating)) %>%
+  mutate(director = str_squish(director)) %>%
+  group_by(director) %>%
+  summarise(
+    freq = n(),
+    avg_rating = mean(imdb_rating, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(freq))
+
+# Step 2: Normalize ratings to colors
+# Create gradient from blue (low rating) to red (high rating)
+director_stats$color <- col_numeric(
+  palette = c("blue", "red"),
+  domain = range(director_stats$avg_rating, na.rm = TRUE)
+)(director_stats$avg_rating)
+
+# Step 3: Build wordcloud2 with color
+wordcloud2(
+  data = director_stats %>% select(word = director, freq, color),
+  color = director_stats$color,
+  size = 0.7,  # adjust for compactness
+  backgroundColor = "white"
+)
+
+```
+
+
+```{r}
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(wordcloud2)
+library(scales)  # for color gradient
+
+# Step 1: Expand cast column into long format
+cast_stats <- merged %>%
+  select(cast, imdb_rating) %>%
+  separate_rows(cast, sep = ",\\s*") %>%
+  mutate(cast = str_squish(cast)) %>%
+  filter(cast != "", !is.na(imdb_rating))
+
+# Step 2: Calculate frequency and average IMDb rating
+actor_summary <- cast_stats %>%
+  group_by(cast) %>%
+  summarise(
+    freq = n(),
+    avg_rating = mean(imdb_rating, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(freq)) %>%
+  slice_max(freq, n = 1000)  # Limit to top 200 actors for clarity
+
+# Step 3: Map ratings to color scale
+actor_summary$color <- col_numeric(
+  palette = c("blue", "red"),
+  domain = range(actor_summary$avg_rating, na.rm = TRUE)
+)(actor_summary$avg_rating)
+
+# Step 4: Generate word cloud
+wordcloud2(
+  data = actor_summary %>% select(word = cast, freq, color),
+  color = actor_summary$color,
+  size = 0.75,
+  backgroundColor = "white"
+)
+
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+library(readr)
+
+df <- merged
+
+
+df <- df %>%
+  mutate(title_lower = str_to_lower(title))
+
+# Function to extract base title (removes sequel indicators)
+extract_base_title <- function(title) {
+  title <- str_remove_all(title, "\\b(part\\s+[ivx]+|part\\s+\\d+|\\bii\\b|\\biii\\b|\\biv\\b|\\bv\\b|\\bvi\\b|\\d+)\\b")
+  str_trim(title)
+}
+
+# Apply the function
+df <- df %>%
+  mutate(base_title = extract_base_title(title_lower))
+
+# Count base title occurrences
+base_counts <- df %>%
+  count(base_title) %>%
+  filter(n > 1)
+
+# Filter the original dataset to only movies with sequels
+sequels_df <- df %>%
+  filter(base_title %in% base_counts$base_title)
+
+# Arrange by base title and year, assign order number
+sequels_clustered <- sequels_df %>%
+  arrange(base_title, year) %>%
+  group_by(base_title) %>%
+  mutate(sequel_number = row_number()) %>%
+  ungroup() %>%
+  select(base_title,title, sequel_number, year, director, imdb_rating,cast) 
+
+```
+
+```{r}
+
+# Load the data
+df <- sequels_clustered
+
+# Convert cast column to list of character vectors
+df <- df %>%
+  mutate(cast_list = str_split(cast, ","))
+
+# Group and filter
+filtered_df <- df %>%
+  group_by(base_title) %>%
+  filter(
+    n() > 1,
+    {
+      # Check if director is same
+      same_director <- n_distinct(director) == 1
+
+      # Check for at least one common cast member
+      common_cast <- Reduce(intersect, cast_list)
+      has_common_cast <- length(common_cast) > 0
+
+      same_director | has_common_cast
+    }
+  ) %>%
+  ungroup() %>%
+  select(title, sequel_number, year, director, cast, imdb_rating)
+
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+# Remove rows with missing IMDB ratings
+sequels_clean <- filtered_df %>%
+  filter(!is.na(imdb_rating))
+
+# Extract base series title by removing common sequel indicators
+sequels_clean <- sequels_clean %>%
+  mutate(series = str_remove(title, "( Part.*| II| III| IV| V| VI| 2| 3| 4| 5| 6| 7| 8| 9)$"))
+
+# Count number of entries per sequel number
+sequel_counts <- sequels_clean %>%
+  count(sequel_number)
+
+# Calculate median ratings per sequel number
+medians <- sequels_clean %>%
+  group_by(sequel_number) %>%
+  summarise(median_rating = median(imdb_rating), .groups = "drop")
+
+# Plot
+ggplot(sequels_clean, aes(x = factor(sequel_number), y = imdb_rating)) +
+  geom_boxplot() +
+  geom_text(data = sequel_counts, aes(x = factor(sequel_number), y = 9.5,
+                                      label = paste0("n=", n)),
+            inherit.aes = FALSE, size = 3.5, vjust = -0.5) +
+  geom_line(data = medians, aes(x = sequel_number, y = median_rating),
+            group = 1, color = "blue", size = 1.2) +
+  geom_point(data = medians, aes(x = sequel_number, y = median_rating),
+             color = "blue", size = 2.5) +
+  labs(
+    title = "IMDB Rating Trends for Sequel Movie Series",
+    subtitle = "Annotated with counts (n) and median rating trendline",
+    x = "Sequel Number",
+    y = "IMDB Rating"
+  ) +
+  ylim(4, 10) +
+  theme_minimal()
+
+```
+
+Inference from Final Boxplot of IMDB Ratings Across Sequel Numbers
+
+Sequel 1 (n = 79):
+Median rating is around 7.4, with a wide spread (from ~5.5 to above 9).
+This reflects strong variability in how original movies with later sequels are received.
+
+Sequel 2 (n = 78):
+Median drops slightly to ~7.2.
+Spread remains large, indicating that second entries in a franchise can be hit or miss.
+
+Sequel 3 (n = 12):
+Slight uptick in median compared to Sequel 2.
+However, much smaller sample size—interpret with caution.
+Consistency improves slightly, suggesting that successful franchises may stabilize quality at this point.
+
+Sequel 4 (n = 1):
+Single entry, no variability.
+Median and actual rating are the same (~6.8), which weakens any generalizable conclusion.
+
+Overall Median Trend (Blue Line):
+A gentle decline from Sequel 1 to 2, then stabilizes for Sequel 3, followed by a drop at Sequel 4.
+This trend reflects a common lifecycle: strong or ambitious starts, then moderate follow-ups, and diminishing returns in later sequels.
+
+Conclusion:
+The first two sequels dominate in number and show a modest but real quality decay.
+Later sequels (3+) may hold quality if a franchise survives that long, but there's limited data.
+Sequel performance is highly variable, but the overall trend leans slightly downward in audience reception.
+
+
+
+```{r}
+library(dplyr)
+library(readr)
+library(stringr)
+
+# Load dataset
+df <- merged
+
+# Normalize and cluster by title
+df <- df %>%
+  mutate(normalized_title = str_to_lower(str_trim(title)))
+
+duplicate_titles <- df %>%
+  count(normalized_title) %>%
+  filter(n > 1)
+
+same_title_movies <- df %>%
+  filter(normalized_title %in% duplicate_titles$normalized_title) %>%
+  arrange(normalized_title, year) %>%
+  group_by(normalized_title) %>%
+  mutate(
+    title_group = cur_group_id(),          # Group ID for each title
+    sequel_number = row_number()           # 1, 2, 3... within each title
+  ) %>%
+  ungroup() %>% select(-8,-9)
+```
+
+
+```{r}
+# Count number of entries per sequel number
+sequel_counts <- same_title_movies %>%
+  count(sequel_number)
+
+# Calculate median ratings per sequel number
+medians <- same_title_movies %>%
+  group_by(sequel_number) %>%
+  summarise(median_rating = median(imdb_rating), .groups = "drop")
+
+# Plot
+ggplot(same_title_movies, aes(x = factor(sequel_number), y = imdb_rating)) +
+  geom_boxplot() +
+  geom_text(data = sequel_counts, aes(x = factor(sequel_number), y = 9.5, label = paste0("n=", n)), 
+            inherit.aes = FALSE, size = 3.5, vjust = -0.5) +
+  geom_line(data = medians, aes(x = sequel_number, y = median_rating), 
+            group = 1, color = "blue", size = 1.2) +
+  geom_point(data = medians, aes(x = sequel_number, y = median_rating), 
+             color = "blue", size = 2.5) +
+  labs(
+    title = "IMDB Rating Trends for Reboots with Same Title",
+    subtitle = "Annotated with counts (n) and median rating trendline",
+    x = "Sequel Number",
+    y = "IMDB Rating"
+  ) +
+  ylim(4, 10) +
+  theme_minimal()
+```
+Inference from Annotated Plot: IMDB Rating Trends for Reboots with Same Title
+
+Sequel 1 and 2 dominate in quantity:
+Each has 363 entries, reflecting that most movies with identical titles are either originals or their first reboot.
+Median ratings are stable (around 7), but there’s a wider spread in Sequel 1—some reboots start very weak or very strong.
+
+Sequel 3 and 4 show rating improvement:
+Median ratings increase slightly (approaching 7.5), indicating moderate quality improvement in third/fourth reboots.
+These entries are less frequent (n = 39 and 13), suggesting only some franchises are extended this far.
+
+Sequel 5 and 6 show signs of fatigue:
+Both quantity and median ratings decline slightly, indicating diminishing audience approval.
+n = 5 and n = 3 suggests these deep reboots are rare and risk underperformance.
+
+Trendline insight:
+The blue median trendline shows a gentle rise until Sequel 4, followed by a drop—classic "franchise fatigue."
+
+Overall conclusion:
+Reboots tend to hover around a 6.5–7.5 rating range.
+Best reception often occurs in mid-series reboots (3rd–4th), while later ones may decline in quality or relevance.
+
+```{r}
+library(rvest)
+library(dplyr)
+library(stringr)
+library(purrr)
+
+# Example: scrape data for one movie
+get_movie_financials <- function(title) {
+  search_title <- URLencode(title)
+  wiki_url <- paste0("https://en.wikipedia.org/wiki/", search_title)
+
+  tryCatch({
+    page <- read_html(wiki_url)
+    infobox <- page %>% html_node(".infobox.vevent")
+
+    budget <- infobox %>%
+      html_nodes("th:contains('Budget') + td") %>%
+      html_text(trim = TRUE)
+
+    box_office <- infobox %>%
+      html_nodes("th:contains('Box office') + td") %>%
+      html_text(trim = TRUE)
+
+    tibble(
+      title = title,
+      budget = ifelse(length(budget) > 0, budget, NA),
+      box_office = ifelse(length(box_office) > 0, box_office, NA)
+    )
+  }, error = function(e) {
+    tibble(title = title, budget = NA, box_office = NA)
+  })
+}
+
+```
+
+```{r}
+# Suppose merged$title is your title column
+movie_financials <- merged %>%
+  distinct(title) %>%
+  pull(title) %>%
+  map_dfr(get_movie_financials)
+
+# Join back to your merged dataset
+merged_enriched <- merged %>%
+  left_join(movie_financials, by = "title")
+
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+library(readr)
+library(tidyr)
+
+# Simulated example: assuming you have a dataframe like this:
+# raw_data <- read_csv("your_file.csv")
+# For now, we simulate two columns: budget and box_office
+
+# Your dataset might look like this:
+# df <- data.frame(id = 21:107, budget = c(...), box_office = c(...))
+
+# Cleaning function for a financial column
+clean_money <- function(x) {
+  x %>%
+    str_remove_all("\\[[^\\]]*\\]") %>%                   # remove [1], [2], etc.
+    str_extract("US?\\$?\\s?\\d+[\\.,\\d]*(–\\d+[\\.,\\d]*)?|\\$?\\d+[\\.,\\d]*(–\\d+[\\.,\\d]*)?") %>% # extract dollar values or ranges
+    str_replace_all(",", "") %>%                          # remove commas
+    str_replace_all("–", "-") %>%                         # unify dashes
+    str_remove_all("[^\\d\\.-]") %>%                      # remove text except numbers/dash/dot
+    str_split("-", simplify = TRUE) %>%                   # handle ranges
+    as.numeric() %>%
+    mean(na.rm = TRUE)                                    # take average of range or single value
+}
+
+# Apply to your columns
+cleaned_df <- merged_enriched %>%
+  mutate(
+    budget_clean = sapply(budget, clean_money),
+    box_office_clean = sapply(box_office, clean_money)
+  )
+
+convert_magnitude <- function(x_raw, x_clean) {
+  multiplier <- case_when(
+    str_detect(x_raw, "billion") ~ 1e9,
+    str_detect(x_raw, "million") ~ 1e6,
+    str_detect(x_raw, "thousand") ~ 1e3,
+    TRUE ~ 1
+  )
+  return(x_clean * multiplier)
+}
+
+cleaned_df <- cleaned_df %>%
+  mutate(
+    budget_usd = convert_magnitude(budget, budget_clean),
+    box_office_usd = convert_magnitude(box_office, box_office_clean)
+  )
+
+# OR using dplyr for all numeric columns
+cleaned_df <- cleaned_df %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.nan(.), NA, .)))
+
+```
+
+```{r}
+cleaned_df <- cleaned_df %>% select(-10,-11) %>%
+  mutate(
+    profit_percent = ifelse(
+      !is.na(budget_usd) & budget_usd > 0,
+      ((box_office_usd - budget_usd) / budget_usd) * 100,
+      NA
+    )
+  )
+
+```
+
+```{r}
+library(rvest)
+library(dplyr)
+library(stringr)
+library(purrr)
+
+# Clean title for Wikipedia
+clean_title_for_wiki <- function(title) {
+  title %>%
+    str_replace_all("[:\\(\\)\\[\\]\\'\\\"]", "") %>%  # remove special chars
+    str_trim() %>%
+    str_replace_all(" ", "_") %>%
+    URLencode()
+}
+
+# Robust scraping function
+get_movie_financials <- function(title) {
+  search_title <- clean_title_for_wiki(title)
+  wiki_url <- paste0("https://en.wikipedia.org/wiki/", search_title)
+
+  tryCatch({
+    page <- read_html(wiki_url)
+
+    # fallback between infobox classes
+    infobox <- page %>% html_node(".infobox.vevent")
+    if (is.null(infobox)) {
+      infobox <- page %>% html_node(".infobox")
+    }
+    if (is.null(infobox)) {
+      stop("No infobox found")
+    }
+
+    # extract budget and box office
+    budget <- infobox %>%
+      html_nodes("th:contains('Budget') + td") %>%
+      html_text(trim = TRUE)
+
+    box_office <- infobox %>%
+      html_nodes("th:contains('Box office') + td") %>%
+      html_text(trim = TRUE)
+
+    tibble(
+      title = title,
+      budget = ifelse(length(budget) > 0, budget, NA),
+      box_office = ifelse(length(box_office) > 0, box_office, NA)
+    )
+
+  }, error = function(e) {
+    message("Failed for: ", title)
+    tibble(title = title, budget = NA, box_office = NA)
+  })
+}
+
+movie_financials <- merged %>%
+  mutate(data = map(title, get_movie_financials)) %>%
+  unnest(data)
+
+
+```
+
+```{r}
+library(httr)
+library(jsonlite)
+library(dplyr)
+library(purrr)
+
+# Your TMDb API key
+api_key <- "02abb68a0c4412c8a9830a5193bd6b12"  # <-- Replace with your actual key
+
+# TMDb scraping function with httr
+get_tmdb_budget_revenue <- function(title, api_key) {
+  # Step 1: Search for movie
+  search_url <- "https://api.themoviedb.org/3/search/movie"
+  search_res <- GET(search_url, query = list(api_key = api_key, query = title))
+  
+  if (status_code(search_res) != 200) {
+    message("Search failed for: ", title)
+    return(tibble(title = title, budget = NA, revenue = NA))
+  }
+
+  search_data <- content(search_res, as = "parsed", encoding = "UTF-8")
+
+  if (length(search_data$results) == 0) {
+    message("No results found for: ", title)
+    return(tibble(title = title, budget = NA, revenue = NA))
+  }
+
+  # Use first match
+  movie_id <- search_data$results[[1]]$id
+
+  # Step 2: Get movie details
+  details_url <- paste0("https://api.themoviedb.org/3/movie/", movie_id)
+  details_res <- GET(details_url, query = list(api_key = api_key))
+
+  if (status_code(details_res) != 200) {
+    message("Failed to fetch details for: ", title)
+    return(tibble(title = title, budget = NA, revenue = NA))
+  }
+
+  details_data <- content(details_res, as = "parsed", encoding = "UTF-8")
+
+  tibble(
+    title = title,
+    budget = details_data$budget,
+    revenue = details_data$revenue
+  )
+}
+
+# Unique movie titles
+unique_titles <- merged %>%
+  distinct(title) %>%
+  pull(title)
+
+# Query TMDb API for each title
+movie_financials_1 <- map_dfr(unique_titles, get_tmdb_budget_revenue, api_key = api_key)
+
+# Merge back into merged dataset
+merged_enriched_1 <- merged %>%
+  left_join(movie_financials_1, by = "title") %>%
+  mutate(
+    profit_percent = ifelse(!is.na(budget) & budget > 0, (revenue - budget) / budget * 100, NA)
+  )
+
+```
+
+```{r}
+merged_enriched_2 <- merged_enriched_1 %>%
+  mutate(
+    profit_percent = ifelse(profit_percent == -100, NA, profit_percent)
+  )
+
+
+```
+
