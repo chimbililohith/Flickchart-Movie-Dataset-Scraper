@@ -2,7 +2,7 @@
 
 Scrape and enrich **10k+ movies from Flickchart** with additional data from **IMDb (OMDb API)**, **Wikipedia**, and **TMDb API** — all in **R**.  
 The pipeline produces a rich dataset including titles, year, director, cast, genre, duration, ratings, budgets, revenues, and calculated profits.  
-On top of scraping, the project also includes an **R Markdown report**(FinalProject.Rmd) with exploratory analysis and visualizations.
+On top of scraping, the project also includes an **R Markdown report** with exploratory analysis and visualizations.
 
 ---
 
@@ -38,9 +38,9 @@ On top of scraping, the project also includes an **R Markdown report**(FinalProj
 
 ---
 
-## R Markdown Analysis (`Final_Project.Rmd`)
+## R Markdown Analysis (`FinalProject.Rmd`)
 
-The **Rmd file** (`Final_Project.Rmd`) builds upon the enriched dataset and produces insights via visualizations and commentary.  
+The **Rmd file** (`FinalProject.Rmd`) builds upon the enriched dataset and produces insights via visualizations and commentary.  
 Key components include:
 
 ### Temporal Trends
